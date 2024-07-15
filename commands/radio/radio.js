@@ -1,5 +1,7 @@
 const {SlashCommandBuilder} = require('discord.js');
+const {playMusic, addStation, removeStation, display} = require('./radioHandler.js')
 
+// Command Structure. All the logic is on the handler
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('radio')
@@ -21,9 +23,15 @@ module.exports = {
                                                 .addIntegerOption((option) => option.setName('index')
                                                     .setDescription('Index of the radio you want to remove'))
                                                 )
+        .addSubcommand((subCommand) => subCommand.setName("display")
+                                                .setDescription("Displays all the radios")
+                                                )
         ,
 	async execute(interaction) {
+        // Get sub command
         const subCommand = interaction.options.getSubcommand();
+
+        // Figure out what it is and call the apropriate function from the handler.
         switch(subCommand){
             case "play" :{
                 var index = interaction.options.getInteger('index');
@@ -31,7 +39,7 @@ module.exports = {
                     await interaction.reply("Usage: /radio play \'index\' (index is a number)");
                     return;
                 }
-                await interaction.reply("Playing radio(not): "+index);
+                playMusic(interaction,index);
                 return;
             }
             case "add" : {
@@ -41,7 +49,7 @@ module.exports = {
                     await interaction.reply("Usage: /radio add \'link\' \'title\'");
                     return;
                 }
-                await interaction.reply("Adding radio(not) with link: "+link+" and title: "+title);
+                addStation(interaction,link,title);
                 return;
             }
             case "remove" : {
@@ -50,8 +58,11 @@ module.exports = {
                     await interaction.reply("Usage: /radio remove \'index\' (index is a number)");
                     return;
                 }
-                await interaction.reply("Removing radio(not): "+index);
+                removeStation(interaction,index);
                 return;
+            }
+            case "display" : {
+                display(interaction);
             }
         }
 	},

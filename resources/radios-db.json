@@ -1,5 +1,5 @@
 {
-    "links": [
+"links":[
     "http://stream.radiojar.com:80/redfm963",
     "https://netradio.live24.gr/rebel1052",
     "http://radio.1055rock.gr:30000/1055.mp3",
@@ -12,9 +12,9 @@
     "https://onairmediagroup.live24.gr/legend1016xanthi",
     "https://netradio.live24.gr/republicthess",
     "https://stream.7000fm.gr/radio/8000/radio.mp3"
-    ],
+],
 
-    "titles": [
+"titles":[
     "Red 96.3 (Rock/Athens)",
     "105.2 Rebel FM (Rock/Athens)",
     "1055 Rock (Rock/Thessaloniki)",
@@ -27,5 +27,4 @@
     "101.6 Legend FM(Pop/Xanthi)",
     "100.3 Republic (Jazz,Electronic/Thessaloniki)",
     "DPG 7000 FM (Techno/Internet)"
-    ]
-}
+]}
