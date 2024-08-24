@@ -1,11 +1,15 @@
 {
   "dependencies": {
+    "@discord-player/extractor": "^4.5.1",
     "@discordjs/voice": "^0.17.0",
+    "discord-player": "^6.6.2",
+    "discord-player-youtubei": "^1.2.6",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "ffmpeg-static": "^5.2.0",
     "opusscript": "^0.0.8",
-    "sodium-native": "^4.1.1"
+    "sodium-native": "^4.1.1",
+    "ytdl-core": "^4.11.5"
   },
   "name": "radiobot",
   "version": "1.0.0",

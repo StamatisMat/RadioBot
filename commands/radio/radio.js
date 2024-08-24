@@ -1,5 +1,6 @@
 const {SlashCommandBuilder} = require('discord.js');
-const {playMusic, addStation, removeStation, display} = require('./radioHandler.js')
+const path = require('node:path');
+const {playMusic, addStation, removeStation, display} = require(path.join(__dirname,"..","..","Handlers","radioHandler.js"));
 
 // Command Structure. All the logic is on the handler
 module.exports = {
@@ -27,7 +28,7 @@ module.exports = {
                                                 .setDescription("Displays all the radios")
                                                 )
         ,
-	async execute(interaction) {
+	async execute(interaction, client) {
         // Get sub command
         const subCommand = interaction.options.getSubcommand();
 
@@ -62,6 +63,7 @@ module.exports = {
                 return;
             }
             case "display" : {
+                await interaction.deferReply();
                 display(interaction);
             }
         }

@@ -1,11 +1,13 @@
-const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, getVoiceConnection } = require('@discordjs/voice');
+
 const { EmbedBuilder } = require('discord.js');
 const fs = require('node:fs');
 const path = require('node:path');
-
+const {askUser} = require('./interactionHandler.js')
 
 // The path to the json file.
-const dbPath = path.join(path.dirname(path.dirname(__dirname)),'/resources/radios-db.json');
+const dbPath = path.join(__dirname,"..","resources","radios-db.json");
+//const dbPath = path.join(path.dirname(path.dirname(__dirname)),'/resources/radios-db.json');
 console.log("local radio db path: "+dbPath);
 var radioLinks;
 var radioTitles;
@@ -81,43 +83,16 @@ function display(interaction) {
     if(typeof radioLinks === 'undefined') retrieveStations();
     // Empty check
     if(radioTitles.length==0){
-        interaction.reply("There are no radios yet. Add one using: /radio add \'link\' \'title\'");
+        interaction.followUp("There are no radios yet. Add one using: /radio add \'link\' \'title\'");
         return;
     }
     // Prepare message
-    var msg = "";
+    var msg = "List of radios:\n";
     for(var i=0;i<radioTitles.length;i++) {
         msg+=(i+1)+". "+radioTitles[i]+"\n";
     };
     msg+= "Usage: /radio play \'index\' (index: number in radio list.)"
-}
-
-// Function that asks the user a question and expects a thumbs up or thumbs down reaction
-async function askUser(interaction,text){
-    // Make the message that the user will reply to
-    const message = await interaction.reply({
-        content: text,
-        fetchReply:true
-    });
-    // Returned var
-    ret = false;
-
-    // React to message so the user can find the reactions quickly.
-    message.react("👍").then(()=> message.react("👎"));
-    // Filter out only the useful emojis and the correct user
-    const filter = (reaction,user) => {return ['👍','👎'].includes(reaction.emoji.name) && user.id == interaction.user.id};
-    // Wait for the reactions, then filter out accordingly.
-    await message.awaitReactions({filter, max: 1, time:15000,errors:["time"]})
-                        .then((collected)=> {
-                            const reaction = collected.first();
-                            if(reaction.emoji.name =="👍") {
-                                ret=true;
-                            }else {
-                                ret=false;
-                            }
-                        })
-                        .catch((collected)=> {ret = false;})
-    return ret;
+    interaction.followUp(msg);
 }
 
 // Function that adds a station into the database
@@ -197,8 +172,10 @@ async function playMusic(interaction,index) {
         await interaction.reply("You are not in a voice channel! Join a channel and try again.");
         return;
     }
-    // Connection start
-    const connection = joinVoiceChannel({
+    // Check for connection
+    var connection = getVoiceConnection(interaction.member.voice.channel.guild.id);
+    // Create new if needed
+    if(!connection) connection = joinVoiceChannel({
         channelId: interaction.member.voice.channel.id,
         guildId:   interaction.member.voice.channel.guild.id,
         adapterCreator: interaction.member.voice.channel.guild.voiceAdapterCreator
@@ -215,6 +192,22 @@ async function playMusic(interaction,index) {
     interaction.reply({embeds:[embed]});
 }
 
+async function radioLeaveChannel(interaction,client) {
+		// Get connection
+		var connection = getVoiceConnection(interaction.member.voice.channel.guild.id);
+		// If bot dies while playing, it will be connected to a voice channel without a connection
+		// Just make a new one.
+		if(!connection) {
+			connection = joinVoiceChannel({
+				channelId: interaction.member.voice.channel.id,
+				guildId:   interaction.member.voice.channel.guild.id,
+				adapterCreator: interaction.member.voice.channel.guild.voiceAdapterCreator
+			});
+		}
+		// Destroy connection
+		connection.destroy();
+        client.state = 0;
+}
 
 
-module.exports = {playMusic, addStation, removeStation, display, retrieveStations, updateStations};
+module.exports = {playMusic, addStation, removeStation, display, retrieveStations, updateStations, radioLeaveChannel};

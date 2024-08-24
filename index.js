@@ -5,6 +5,9 @@ require('dotenv').config();
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const loadCommands = require('./Handlers/CommandHandler.js');
 const path = require('node:path');
+const { Player } = require("discord-player");
+const { YoutubeiExtractor } = require("discord-player-youtubei");
+
 var repl = false;
 const client = new Client({
    intents: [
@@ -18,14 +21,28 @@ const client = new Client({
 
 const commandsPath = path.join(__dirname,'commands');
 
-
+/* 
+   States:
+   0 - idle
+   1 - radio
+   2 - youtube/soundcloud (uses discord-player)
+*/
+client.state = 0; // Maybe migrate to discord-player for radio as well to save this hassle. Or do what I already did and screw everything up using Dispatchers.
 
 client.on('ready', () => {
    console.log(`Logged in as ${client.user.tag}!`);
 });
 
+// Add the player on the client
+player = new Player(client);
+player.extractors.loadDefault((ext) => ext !== 'com.discord-player.youtubeextractor');
+player.extractors.register(YoutubeiExtractor, {});
+
 // Log In our bot, then reload the commands.
 client.login(process.env.BOT_TOKEN).then(()=>loadCommands(client,path, commandsPath));
+
+
+
 
 // Automation of command handling, mostly done in Command Handler.
 client.on(Events.InteractionCreate, async interaction => {
@@ -50,6 +67,11 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
+// this event is emitted whenever discord-player starts to play a track
+player.events.on('playerStart', (queue, track) => {
+   // we will later define queue.metadata object while creating the queue
+   queue.metadata.channel.send(`Started playing **${track.title}**!`);
+});
 
 // Silly messages to test the reply/react/send gif functions.
 client.on('messageCreate', msg => {
