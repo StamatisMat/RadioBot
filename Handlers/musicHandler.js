@@ -14,14 +14,23 @@ async function search(interaction,client,queue) {
     if (result.tracks.length === 0)
         return interaction.reply("No results"); // TODO: Embed reply
     
+    // wait for previous task to be released and our task to be resolved
+    await queue.tasksQueue.acquire().getTask();
     // Play the playlist or add it to the queue
-    const track = result.tracks[0];
+    const track = result.tracks[0]; // TODO: Make user select result
     queue.addTrack(track);
     
-    if(!queue.node.isPlaying()){
-        console.log("Im not playing games now");
-        await queue.node.play();
-    } 
+    try{
+        if(!queue.node.isPlaying()){
+            await queue.node.play();
+        }
+    }catch(err) {
+        interaction.followUp("Operation Caneled");
+    }finally {
+        // release the task we acquired to let other tasks to be executed
+        queue.tasksQueue.release();
+    }
+    
     /*const {track} = await useMainPlayer().play(interaction.member.voice.channel,url,{
         nodeOptions: {
         // nodeOptions are the options for guild node (aka your queue in simple word)

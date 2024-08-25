@@ -1,14 +1,13 @@
 const {SlashCommandBuilder} = require('discord.js');
 const path = require('node:path');
 const {search} = require(path.join('..','..','Handlers','musicHandler'));
-//const { leaveChannel }  = require(path.join(__dirname,"..","..","Handlers","radioHandler.js"));
 const {joinVoiceChannel, getVoiceConnection } = require('@discordjs/voice');
 const { useMainPlayer, useQueue } = require('discord-player');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("play")
-		.setDescription("play a song from YouTube.")
+		.setDescription("Plays a song given a query")
 		.addStringOption(option =>
             option.setName("searchterms").setDescription("search keywords").setRequired(true)),
 	execute: async (interaction, client) => {
@@ -20,7 +19,7 @@ module.exports = {
         }
 
         // Check for connection
-        var connection = getVoiceConnection(interaction.member.voice.channel.guild.id);
+        let connection = getVoiceConnection(interaction.member.voice.channel.guild.id);
         // Create new if needed
         if(!connection) connection = joinVoiceChannel({
             channelId: interaction.member.voice.channel.id,
@@ -28,7 +27,7 @@ module.exports = {
             adapterCreator: interaction.member.voice.channel.guild.voiceAdapterCreator
         });
         //const player = useMainPlayer();
-        var queue = useQueue(interaction.member.voice.channel.guild.id);
+        let queue = useQueue(interaction.member.voice.channel.guild.id);
         if(!queue) {
             queue = await useMainPlayer().nodes.create(interaction.member.voice.channel.guild.id,{
                 metadata: {
