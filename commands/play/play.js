@@ -28,7 +28,7 @@ module.exports = {
             adapterCreator: interaction.member.voice.channel.guild.voiceAdapterCreator
         });
         //const player = useMainPlayer();
-        var queue = useQueue();
+        var queue = useQueue(interaction.member.voice.channel.guild.id);
         if(!queue) {
             queue = await useMainPlayer().nodes.create(interaction.member.voice.channel.guild.id,{
                 metadata: {
